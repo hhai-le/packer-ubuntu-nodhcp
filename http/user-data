@@ -1,0 +1,88 @@
+#cloud-config
+autoinstall:
+  version: 1
+  storage:  # This should set the interactive (lvm set) default
+    layout:
+      name: lvm
+      match:
+        size: largest
+  apt:
+    disable_components: []
+    fallback: abort
+    geoip: true
+    mirror-selection:
+      primary:
+      - country-mirror
+      - arches: &id001
+        - amd64
+        - i386
+        uri: http://archive.ubuntu.com/ubuntu/
+      - arches: &id002
+        - s390x
+        - arm64
+        - armhf
+        - powerpc
+        - ppc64el
+        - riscv64
+        uri: http://ports.ubuntu.com/ubuntu-ports
+    preserve_sources_list: false
+    security:
+    - arches: *id001
+      uri: http://security.ubuntu.com/ubuntu/
+    - arches: *id002
+      uri: http://ports.ubuntu.com/ubuntu-ports
+    package_update: true
+    package_upgrade: true
+  drivers:
+    install: false
+  identity:
+    hostname: ubuntu
+    password: "$6$roJa.EXPQpLA6Lsy$CJKbqMX9/ZvuhOXVzUweosjdjvzs0QM7RnfbOvCilwy3KBgrw/xXdGAMz1IlboJMNvdN6kQAPddINO.5YXZ5e."
+    realname: linuxroot
+    username: linuxroot
+  kernel:
+    package: linux-generic
+  keyboard:
+    layout: us
+    toggle: null
+    variant: ''
+  early-commands:
+    - sudo systemctl stop ssh
+  locale: en_US.UTF-8
+  network:
+    network:
+      version: 2
+      renderer: networkd
+      ethernets:
+        ens192:
+          dhcp4: no
+          addresses:
+            - 192.168.148.212/24
+          nameservers:
+            addresses: [192.168.148.11,192.168.148.12]
+          routes:
+            - to: default
+              via: 192.168.148.1
+  oem:
+    install: auto
+  source:
+    id: ubuntu-server
+    search_drivers: false
+  ssh:
+    allow-pw: true
+    authorized-keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJj/nGEKECH8cgPP1S0Hv1iab9shG5YIFLO42PPgFQQm ed25519-key-20240306
+    install-server: true
+  updates: security
+  users:
+  - default
+  - name: linuxroot
+    gecos: linuxroot
+    create_groups: true
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    passwd: "$6$roJa.EXPQpLA6Lsy$CJKbqMX9/ZvuhOXVzUweosjdjvzs0QM7RnfbOvCilwy3KBgrw/xXdGAMz1IlboJMNvdN6kQAPddINO.5YXZ5e."
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJj/nGEKECH8cgPP1S0Hv1iab9shG5YIFLO42PPgFQQm ed25519-key-20240306
+  late-commands:
+    - "echo 'linuxroot ALL=(ALL) NOPASSWD: ALL' >> /target/etc/sudoers.d/linuxroot"
